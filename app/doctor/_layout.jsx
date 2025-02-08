@@ -30,25 +30,20 @@ export default function TabLayout(){
     },[authenticated])
 
     return(
-        
+        <>
         <Tabs screenOptions={{headerShown:false}}>
-            <Tabs.Screen name = "home"
-                options={{
-                    tabBarLabel:'Home',
-                    tabBarIcon:({colour,size})=>(
-                        <AntDesign name="home" size={size} color="colour" />
-                    )
-                } }
-            />
-            <Tabs.Screen name = "Patients"
+            <Tabs.Screen name = "index"
                 options={{
                     tabBarLabel:'Patients',
                     tabBarIcon:({colour,size})=>(
-                        <Feather name="profile" size={size} color="black" />
+                        <Feather name="home" size={size} color="black"/>
                     )
                 } }
             />
         </Tabs>
+        
+        </>
+
         
     )
 }

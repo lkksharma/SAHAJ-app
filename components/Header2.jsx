@@ -23,7 +23,7 @@ const MyComponent = () => (
     </TouchableOpacity>
     </Card>
     <Card style={{margin:10}}>
-    <TouchableOpacity onPress={() => router.push('feats/jagrook')}>
+    <TouchableOpacity onPress={() => router.push('/feats/jagrook')}>
     <Card.Title
       title="Jagrook"
       subtitle="Educational Platform"
