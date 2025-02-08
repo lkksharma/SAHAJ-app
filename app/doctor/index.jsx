@@ -6,7 +6,7 @@ import { Button } from 'react-native-paper';
 import Header from '../../components/Header.jsx';
 import { collection, query, where, getDocs } from 'firebase/firestore';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
-
+git 
 export default function DoctorHome() {
     const [currentUser, setCurrentUser] = useState(null);
     const [clients, setClients] = useState([]);

@@ -175,4 +175,8 @@ const Jagrook = () => {
   );
 };
 
+<<<<<<< HEAD
 export default Jagrook;
+=======
+export default Jagrook;
+>>>>>>> refs/remotes/origin/main
