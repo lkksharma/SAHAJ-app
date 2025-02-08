@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { View, Text, StyleSheet, Image, TouchableOpacity, Alert, ActivityIndicator, Platform } from "react-native";
+import { View, Text, StyleSheet, Image, TouchableOpacity, Alert, ActivityIndicator, Platform, ScrollView } from "react-native";
 import { Appbar, Card } from "react-native-paper";
 import * as ImagePicker from "expo-image-picker";
 import * as Location from "expo-location";
@@ -148,7 +148,7 @@ export default function Medisight() {
                 <Appbar.BackAction onPress={() => router.push("(tabs)")} />
                 <Appbar.Content title="Medi-Sight" />
             </Appbar.Header>
-
+            <ScrollView>
             <View style={styles.container}>
                 <Card style={styles.infoCard}>
                     <Text style={styles.cardTitle}>What is Medi-Sight?</Text>
@@ -216,6 +216,7 @@ export default function Medisight() {
                     </Text>
                 </TouchableOpacity>
             </View>
+            </ScrollView>
         </>
     );
 }

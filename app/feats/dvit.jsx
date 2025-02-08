@@ -32,7 +32,6 @@ const doctorsData = [
     { id: '4', name: 'Dr. Sneha Gupta', experience: '12 Years', expertise: 'Pediatrician', location: 'Chennai', image: 'https://via.placeholder.com/150' },
 ];
 
-<<<<<<< HEAD
 const DoctorSearch = () => {
     const [clients, setClients] = useState([]);
     const [searchQuery, setSearchQuery] = useState('');
@@ -116,56 +115,6 @@ const DoctorSearch = () => {
         }
     };
 
-=======
-export default function DoctorSearch() {
-    const [clients, setClients] = useState([]);
-    const [searchQuery, setSearchQuery] = useState('');
-    const [selectedClient, setSelectedClient] = useState(null);
-    const [modalVisible, setModalVisible] = useState(false);
-    const [treatments, setTreatments] = useState('');
-
-    useEffect(() => {
-        fetchClients();
-      }, []);
-    const filteredDoctors = doctorsData.filter(doctor =>
-        doctor.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        doctor.expertise.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        doctor.location.toLowerCase().includes(searchQuery.toLowerCase())
-    );
-    const renderClientItem = ({ item }) => (
-        <TouchableOpacity
-          style={styles.clientCard}
-          onPress={() => {
-            setSelectedClient(item);
-            setModalVisible(true);
-          }}
-        >
-          <MaterialCommunityIcons name="account" size={24} color="#4f46e5" />
-          <View style={styles.clientInfo}>
-            <Text style={styles.clientName}>{item.username}</Text>
-            <Text style={styles.clientEmail}>{item.email}</Text>
-          </View>
-          <MaterialCommunityIcons name="chevron-right" size={24} color="#94a3b8" />
-        </TouchableOpacity>
-      );
-
-      const fetchClients = async () => {
-        try {
-          const q = query(collection(db, "users"), where("role", "==", "doctor"));
-          const querySnapshot = await getDocs(q);
-          const clientsList = [];
-          querySnapshot.forEach((doc) => {
-            clientsList.push({ id: doc.id, ...doc.data() });
-          });
-          setClients(clientsList);
-        } catch (error) {
-          console.error("Error fetching clients:", error);
-          Alert.alert("Error", "Failed to load clients");
-        } finally {
-          setLoading(false);
-        }
-      };
->>>>>>> refs/remotes/origin/main
     return (
         <>
             <Appbar.Header>
@@ -235,7 +184,6 @@ export default function DoctorSearch() {
                     onChangeText={text => setSearchQuery(text)}
                 />
 
-<<<<<<< HEAD
               <FlatList
                 data={clients}
                 renderItem={renderClientItem}
@@ -294,65 +242,6 @@ export default function DoctorSearch() {
         </>
     );
 };
-=======
-                <FlatList
-                        data={clients}
-                        renderItem={renderClientItem}
-                        keyExtractor={(item) => item.id}
-                        contentContainerStyle={styles.listContainer}
-                        ListEmptyComponent={
-                          <Text style={styles.emptyText}>No clients found</Text>
-                        }
-                      />
-                      {/* <Modal
-                              visible={modalVisible}
-                              animationType="slide"
-                              transparent={true}
-                              onRequestClose={() => {
-                                setModalVisible(false);
-                                resetForm();
-                              }}
-                            >
-                              <View style={styles.modalOverlay}>
-                                <View style={styles.modalContent}>
-                                  <Text style={styles.modalHeader}>Doctor Details</Text>
-                      
-                                  <View style={styles.modalButtons}>
-                                    <TouchableOpacity
-                                      style={[styles.button, styles.submitButton]}
-                                      onPress={handleSubmit}
-                                    >
-                                      {submitting ? (
-                                        <ActivityIndicator size="small" color="#fff" />
-                                      ) : (
-                                        <Text style={styles.buttonText}>Submit</Text>
-                                      )}
-                                    </TouchableOpacity>
-                                  </View>
-                                </View>
-                              </View>
-                            </Modal> */}
-                {/* <FlatList
-                    data={filteredDoctors}
-                    keyExtractor={item => item.id}
-                    renderItem={({ item }) => (
-                        <Card style={styles.card}>
-                            <View style={styles.cardContent}>
-                                <Image source={{ uri: item.image }} style={styles.image} />
-                                <View style={styles.textContainer}>
-                                    <Text style={styles.name}>{item.name}</Text>
-                                    <Text style={styles.details}>{item.expertise} | {item.experience}</Text>
-                                    <Text style={styles.location}>📍 {item.location}</Text>
-                                </View>
-                            </View>
-                        </Card>
-                    )}
-                /> */}
-            </View>
-        </>
-    );
-}
->>>>>>> refs/remotes/origin/main
 
 const styles = StyleSheet.create({
     container: {
@@ -427,7 +316,6 @@ const styles = StyleSheet.create({
         flexDirection: 'row',
         alignItems: 'center',
         paddingVertical: 8,
-<<<<<<< HEAD
       },
       modalOverlay: {
         flex: 1,
@@ -566,7 +454,3 @@ const styles = StyleSheet.create({
 });
 
 export default DoctorSearch;
-=======
-      }
-});
->>>>>>> refs/remotes/origin/main
