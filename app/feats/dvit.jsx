@@ -38,7 +38,7 @@ export default function DoctorSearch() {
     const [selectedClient, setSelectedClient] = useState(null);
     const [modalVisible, setModalVisible] = useState(false);
     const [treatments, setTreatments] = useState('');
-    
+
     useEffect(() => {
         fetchClients();
       }, []);
@@ -158,7 +158,7 @@ export default function DoctorSearch() {
                           <Text style={styles.emptyText}>No clients found</Text>
                         }
                       />
-                      <Modal
+                      {/* <Modal
                               visible={modalVisible}
                               animationType="slide"
                               transparent={true}
@@ -185,7 +185,7 @@ export default function DoctorSearch() {
                                   </View>
                                 </View>
                               </View>
-                            </Modal>
+                            </Modal> */}
                 {/* <FlatList
                     data={filteredDoctors}
                     keyExtractor={item => item.id}
