@@ -1,0 +1,8 @@
+**/dist/*
+**/node_modules/*
+**/server.js
+**/webpack.config*.js
+**/test-utils/setup.js
+**/App.test.js
+**/__tests__/**
+**/_tests_/**
