@@ -1,5 +1,5 @@
-import React, { useState } from "react";
-import { View, Text, StyleSheet, Image, TouchableOpacity, Alert, ActivityIndicator, Platform, ScrollView } from "react-native";
+import React, { useState, useEffect } from "react";
+import { View, Text, StyleSheet, Image, TouchableOpacity, Alert, ActivityIndicator, Platform, ScrollView, Modal } from "react-native";
 import { Appbar, Card } from "react-native-paper";
 import * as ImagePicker from "expo-image-picker";
 import * as Location from "expo-location";
@@ -13,6 +13,8 @@ export default function Medisight() {
     const [location, setLocation] = useState(null);
     const [visible, setVisible] = useState(false);
     const [uploading, setUploading] = useState(false);
+    const [modalVisible, setModalVisible] = useState(false);
+    const [predictions, setPredictions] = useState([]);
     const [uploadSuccess, setUploadSuccess] = useState(false);
     const [errorMessage, setErrorMessage] = useState(null);
     const [showResultModal, setShowResultModal] = useState(false); 
@@ -22,6 +24,47 @@ export default function Medisight() {
     const [uploadedImageUrl, setUploadedImageUrl] = useState(null);
 
 
+    const fetchPredictions = async () => {
+        try {
+            const medisightRef = collection(db, 'medisight');
+            
+            // Get all documents without ordering
+            const querySnapshot = await getDocs(medisightRef);
+    
+            if (!querySnapshot.empty) {
+                const allData = [];
+                
+                // Loop through each document
+                querySnapshot.forEach((doc) => {
+                    const docData = doc.data();
+                    
+                    // Add alternatives if they exist
+                    if (docData.alternatives) {
+                        Object.entries(docData.alternatives).forEach(([key, value]) => {
+                            allData.push({
+                                id: `${doc.id}_${key}`, // Combine doc ID and key for unique identifier
+                                docId: doc.id,
+                                ...value
+                            });
+                        });
+                    }
+                });
+    
+                if (allData.length > 0) {
+                    console.log("All data found:", allData); // Debug log
+                    setPredictions(allData);
+                    setModalVisible(true);
+                } else {
+                    Alert.alert("No Data", "No medicine data found.");
+                }
+            } else {
+                Alert.alert("No Entries", "No entries found in the database.");
+            }
+        } catch (error) {
+            console.error("Error fetching data:", error);
+            Alert.alert("Error", "Failed to fetch medicine data");
+        }
+    };
     const getLocation = async () => {
         setVisible(true);
         handleLocationPermission();
@@ -133,60 +176,35 @@ export default function Medisight() {
                 <Appbar.BackAction onPress={() => router.push("(tabs)")} />
                 <Appbar.Content title="Medi-Sight" />
             </Appbar.Header>
+            
             <ScrollView>
-            <View style={styles.container}>
-                <Card style={styles.infoCard}>
-                    <Text style={styles.cardTitle}>What is Medi-Sight?</Text>
-                    <Text style={styles.cardText}>
-                        Medi-Sight is an intelligent tool that:
-                        {"\n"}• Uses OCR to extract salt compositions and suggest PMJAY alternatives.
-                        {"\n"}• Locates affordable medicine centers nearby via GPS.
-                        {"\n"}• Helps track spending and savings using expense tools.
-                        {"\n"}• Provides an easy way to witness and understand medical procedures.
-                    </Text>
-                </Card>
-
-                {selectedImage ? (
-                    <View style={styles.imageContainer}>
-                        <Image source={{ uri: selectedImage }} style={styles.image} />
-                        <TouchableOpacity 
-                            style={styles.removeButton} 
-                            onPress={() => setSelectedImage(null)}
-                        >
-                            <Text style={styles.removeButtonText}>❌</Text>
-                        </TouchableOpacity>
-                    </View>
-                ) : (
-                    <Text style={styles.placeholder}>No image selected</Text>
-                )}
-
-                <TouchableOpacity style={styles.button} onPress={pickImage}>
-                    <Text style={styles.buttonText}>📂 Pick from Gallery</Text>
-                </TouchableOpacity>
-
-                <TouchableOpacity style={styles.button} onPress={takePhoto}>
-                    <Text style={styles.buttonText}>📷 Take a Photo</Text>
-                </TouchableOpacity>
-
-                <TouchableOpacity style={styles.locationButton} onPress={getLocation}>
-                    <Text style={styles.buttonText}>📍 Get Location</Text>
-                </TouchableOpacity>
-
-                {location && (
-                    <Card style={styles.locationCard}>
-                        <Text style={styles.locationText}>
-                            🌍 Location: {"\n"}
-                            Latitude: {location.latitude.toFixed(6)}{"\n"}
-                            Longitude: {location.longitude.toFixed(6)}
-                        </Text>
+                <View style={styles.container}>
+                    <Card style={styles.infoCard}>
+                        <Card.Content>
+                            <Text style={styles.cardTitle}>What is Medi-Sight?</Text>
+                            <Text style={styles.cardText}>
+                                Medi-Sight is an intelligent tool that:
+                                {"\n"}• Uses OCR to extract salt compositions and suggest PMJAY alternatives.
+                                {"\n"}• Locates affordable medicine centers nearby via GPS.
+                                {"\n"}• Helps track spending and savings using expense tools.
+                                {"\n"}• Provides an easy way to witness and understand medical procedures.
+                            </Text>
+                        </Card.Content>
                     </Card>
-                )}
 
-                {uploading && <ActivityIndicator size="large" color="#6200ea" />}
-                {uploadSuccess && (
-                    <Text style={styles.successText}>✅ Image uploaded successfully!</Text>
-                )}
-                {errorMessage && <Text style={styles.errorText}>{errorMessage}</Text>}
+                    {selectedImage ? (
+                        <View style={styles.imageContainer}>
+                            <Image source={{ uri: selectedImage }} style={styles.image} />
+                            <TouchableOpacity 
+                                style={styles.removeButton} 
+                                onPress={() => setSelectedImage(null)}
+                            >
+                                <Text style={styles.removeButtonText}>❌</Text>
+                            </TouchableOpacity>
+                        </View>
+                    ) : (
+                        <Text style={styles.placeholder}>No image selected</Text>
+                    )}
 
                 <TouchableOpacity 
                     style={[
@@ -212,6 +230,66 @@ export default function Medisight() {
       </AnimatePresence>
             </View>
             </ScrollView>
+            
+            <Modal
+    animationType="slide"
+    transparent={true}
+    visible={modalVisible}
+    onRequestClose={() => setModalVisible(false)}
+>
+    <View style={styles.modalContainer}>
+        <View style={styles.modalContent}>
+            <Text style={styles.modalTitle}>All Available Medicines</Text>
+            {predictions.length > 0 ? (
+                <ScrollView style={styles.scrollView}>
+                    {predictions.map((item, index) => (
+                        <Card 
+                            key={item.id} 
+                            style={styles.predictionCard}
+                        >
+                            <Card.Content>
+                                <Text style={styles.cardTitle}>
+                                    Medicine {index + 1}
+                                </Text>
+                                
+                                {/* Display all available fields */}
+                                {item.Name_of_Product && (
+                                    <Text style={styles.itemText}>Name: {item.Name_of_Product}</Text>
+                                )}
+                                {item.MRP && (
+                                    <Text style={styles.itemText}>MRP: ₹{item.MRP}</Text>
+                                )}
+                                {item.Drug_Code && (
+                                    <Text style={styles.itemText}>Drug Code: {item.Drug_Code}</Text>
+                                )}
+                                {item.Unit_Size && (
+                                    <Text style={styles.itemText}>Unit Size: {item.Unit_Size}</Text>
+                                )}
+                                {item.Therapeutic_Group && (
+                                    <Text style={styles.itemText}>Group: {item.Therapeutic_Group}</Text>
+                                )}
+                                {item.Salt_Composition && (
+                                    <Text style={styles.itemText}>Salt: {item.Salt_Composition}</Text>
+                                )}
+                                {item.Manufacturer && (
+                                    <Text style={styles.itemText}>Manufacturer: {item.Manufacturer}</Text>
+                                )}
+                            </Card.Content>
+                        </Card>
+                    ))}
+                </ScrollView>
+            ) : (
+                <Text style={styles.noPredictionsText}>No data available</Text>
+            )}
+            <TouchableOpacity 
+                style={styles.closeButton}
+                onPress={() => setModalVisible(false)}
+            >
+                <Text style={styles.closeButtonText}>Close</Text>
+            </TouchableOpacity>
+        </View>
+    </View>
+</Modal>
         </>
     );
 }
@@ -324,4 +402,83 @@ const styles = StyleSheet.create({
         fontSize: 16,
         marginVertical: 10,
     },
+    modalContainer: {
+        flex: 1,
+        justifyContent: 'center',
+        alignItems: 'center',
+        backgroundColor: 'rgba(0, 0, 0, 0.5)',
+    },
+    modalContent: {
+        width: '90%',
+        maxHeight: '80%',
+        backgroundColor: 'white',
+        borderRadius: 15,
+        padding: 20,
+        elevation: 5,
+    },
+    modalTitle: {
+        fontSize: 24,
+        fontWeight: 'bold',
+        textAlign: 'center',
+        marginBottom: 20,
+    },
+    scrollView: {
+        maxHeight: '80%',
+    },
+    predictionCard: {
+        marginBottom: 10,
+    },
+    closeButton: {
+        backgroundColor: '#6200ea',
+        padding: 15,
+        borderRadius: 8,
+        alignItems: 'center',
+        marginTop: 15,
+    },
+    closeButtonText: {
+        color: 'white',
+        fontSize: 16,
+        fontWeight: 'bold',
+    },
+    noPredictionsText: {
+        textAlign: 'center',
+        padding: 20,
+        fontSize: 16,
+        color: '#666',
+    },
+});
+
+const additionalStyles = StyleSheet.create({
+    originalCard: {
+        backgroundColor: '#e8f5e9',
+        borderWidth: 1,
+        borderColor: '#43a047'
+    },
+    alternativeCard: {
+        backgroundColor: '#fff'
+    },
+    originalTitle: {
+        color: '#2e7d32',
+        fontSize: 20
+    },
+    alternativeTitle: {
+        color: '#1976d2'
+    },
+    itemText: {
+        fontSize: 15,
+        marginVertical: 2
+    },
+    storeCard: {
+        marginTop: 15,
+        backgroundColor: '#fff3e0'
+    },
+    storeTitle: {
+        fontSize: 18,
+        fontWeight: 'bold',
+        color: '#e65100'
+    },
+    storeText: {
+        fontSize: 15,
+        marginTop: 5
+    }
 });
