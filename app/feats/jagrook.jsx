@@ -19,12 +19,12 @@ const Jagrook = () => {
     {
       title: 'ABHA (Ayushman Bharat Health Account)',
       description: 'Create your unique health ID and access digital health records securely.',
-      link: 'https://abha.gov.in/',
+      link: 'https://abha.abdm.gov.in/',
     },
     {
       title: 'National Health Portal',
       description: 'Gateway to authentic health information and Indian health services.',
-      link: 'https://www.nhp.gov.in/',
+      link: 'https://www.ncd.nhp.gov.in/',
     },
     {
       title: 'Ministry of Health and Family Welfare',
@@ -41,22 +41,22 @@ const Jagrook = () => {
   const diseaseVideos = [
     {
       title: 'Understanding Diabetes',
-      thumbnail: '/api/placeholder/320/180',
+      thumbnail: '../../assets/images/diabetes.jpeg',
       link: 'https://youtu.be/XfyGv-xwjlI?si=eoz3gDLUCVOffBT9',
     },
     {
       title: 'Heart Disease Prevention',
-      thumbnail: '/api/placeholder/320/180',
+      thumbnail: '../../assets/images/Heart.avif',
       link: 'https://youtu.be/Oqt9TgWcrxI?si=URG1vAS70tEQa5rw',
     },
     {
       title: 'Managing Hypertension',
-      thumbnail: '/api/placeholder/320/180',
+      thumbnail: '../../assets/images/hyper.png',
       link: 'https://youtu.be/r5XTTeP039Q?si=JMqMPKLpUvXcDzAt',
     },
     {
       title: 'Mental Health Awareness',
-      thumbnail: '/api/placeholder/320/180',
+      thumbnail: '../../assets/images/mental.jpg',
       link: 'https://youtu.be/gy1iH_Gxn0Q?si=SnMXZg1r-uS_l3mK',
     },
   ];
@@ -103,7 +103,7 @@ const Jagrook = () => {
       </Appbar.Header>
 
       <ScrollView style={styles.scrollView}>
-        {/* Government Resources Section */}
+        
         <View style={styles.section}>
           <Text style={styles.sectionTitle}>Government Healthcare Resources</Text>
           <View style={styles.resourcesGrid}>
@@ -123,7 +123,7 @@ const Jagrook = () => {
           </View>
         </View>
 
-        {/* Disease Videos Section */}
+        
         <View style={styles.section}>
           <Text style={styles.sectionTitle}>Educational Videos</Text>
           <ScrollView horizontal showsHorizontalScrollIndicator={false}>
@@ -143,7 +143,7 @@ const Jagrook = () => {
           </ScrollView>
         </View>
 
-        {/* Medicine Information Section */}
+        
         <View style={styles.section}>
           <Text style={styles.sectionTitle}>Medicine Safety Information</Text>
           <View style={styles.medicineGrid}>
