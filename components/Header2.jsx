@@ -2,6 +2,7 @@ import { router } from 'expo-router';
 import * as React from 'react';
 import { StyleSheet, TouchableOpacity } from 'react-native';
 import { Avatar, Card, IconButton } from 'react-native-paper';
+// import Jagrook from '../app/feats/jagrook';
 
 const MyComponent = () => (
   <>
@@ -23,7 +24,7 @@ const MyComponent = () => (
     </TouchableOpacity>
     </Card>
     <Card style={{margin:10}}>
-    <TouchableOpacity onPress={() => router.push('/feats/jagrook')}>
+    <TouchableOpacity onPress={() => router.push('feats/jagrook')}>
     <Card.Title
       title="Jagrook"
       subtitle="Educational Platform"
