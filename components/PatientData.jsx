@@ -13,7 +13,9 @@ import {
 } from 'react-native';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { collection, getDocs, query, where, addDoc } from 'firebase/firestore';
-import { db } from '../config/FirebaseConfig';
+import { db, auth } from '../config/FirebaseConfig';
+import { Button } from 'react-native-paper';
+import { signOut } from 'firebase/auth';
 
 const HospitalPage = () => {
   const [clients, setClients] = useState([]);
@@ -96,13 +98,13 @@ const HospitalPage = () => {
     </TouchableOpacity>
   );
 
-  if (loading) {
-    return (
-      <View style={styles.centered}>
-        <ActivityIndicatorComponent size="large" color="#4f46e5" />
-      </View>
-    );
-  }
+  // if (loading) {
+  //   return (
+  //     <View style={styles.centered}>
+  //       <ActivityIndicatorComponent size="large" color="#4f46e5" />
+  //     </View>
+  //   );
+  // }
 
   return (
     <View style={styles.container}>
@@ -182,9 +184,13 @@ const HospitalPage = () => {
                 )}
               </TouchableOpacity>
             </View>
+
           </View>
         </View>
       </Modal>
+      <Button mode="contained" onPress={() => signOut(auth)} style={styles.logoutButton}>
+                Logout
+            </Button>
     </View>
   );
 };
