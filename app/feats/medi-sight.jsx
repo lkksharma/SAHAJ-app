@@ -5,8 +5,21 @@ import * as ImagePicker from "expo-image-picker";
 import * as Location from "expo-location";
 import axios from "axios";
 import { router } from "expo-router";
-import ResultModal from "./ResultModal";
-import { AnimatePresence } from "framer-motion";
+import { getApp, getApps, initializeApp } from 'firebase/app';
+import { getFirestore, collection, getDocs, query, orderBy, limit } from 'firebase/firestore';
+
+const firebaseConfig = {
+    apiKey: "AIzaSyDaOcZkNv98Qw3lYc5m8X71T4Hq_mUj0lM",
+    authDomain: "sahaj-9abf5.firebaseapp.com",
+    projectId: "sahaj-9abf5",
+    storageBucket: "sahaj-9abf5.appspot.com",
+    messagingSenderId: "275913171338",
+    appId: "1:275913171338:web:fe69a15fa0ba8fff4d9d5c",
+    measurementId: "G-1HVNHZ1YQE"
+};
+
+const app = !getApps().length ? initializeApp(firebaseConfig) : getApp();
+const db = getFirestore(app);
 
 export default function Medisight() {
     const [selectedImage, setSelectedImage] = useState(null);
@@ -16,13 +29,7 @@ export default function Medisight() {
     const [modalVisible, setModalVisible] = useState(false);
     const [predictions, setPredictions] = useState([]);
     const [uploadSuccess, setUploadSuccess] = useState(false);
-    const [errorMessage, setErrorMessage] = useState(null);
-    const [showResultModal, setShowResultModal] = useState(false); 
-    const [wordRead, setWordRead] = useState(null);
-    const [alternatives, setAlternatives] = useState([]);
-    const [nearestStore, setNearestStore] = useState(null);
-    const [uploadedImageUrl, setUploadedImageUrl] = useState(null);
-
+    const [latestDocId, setLatestDocId] = useState(null);
 
     const fetchPredictions = async () => {
         try {
@@ -118,57 +125,70 @@ export default function Medisight() {
         }
     };
 
-    const handleUpload = async (file) => {
-        const storedLocation = JSON.parse(localStorage.getItem("userLocation"));
-        if (!file || !storedLocation?.latitude || !storedLocation?.longitude) {
-          setErrorMessage("Please allow location access before uploading.");
-          return;
+    const uploadImage = async () => {
+        if (!selectedImage) {
+            Alert.alert("No Image", "Please select or capture an image before uploading.");
+            return;
         }
-    
+        if (!location) {
+            Alert.alert("Location Required", "Please allow location access before uploading.");
+            return;
+        }
+
         setUploading(true);
-        setUploadProgress(0);
-        setErrorMessage(null);
-    
-        const formData = new FormData();
-        formData.append("image", file);
-        formData.append("latitude", storedLocation.latitude);
-        formData.append("longitude", storedLocation.longitude);
-    
+
         try {
-          const response = await axios.post("http://127.0.0.1:8000/api/images/upload/", formData, {
-            headers: { "Content-Type": "multipart/form-data" },
-            onUploadProgress: (progressEvent) => {
-              let percentCompleted = Math.round((progressEvent.loaded * 100) / progressEvent.total);
-              setUploadProgress(percentCompleted);
-            },
-          });
-    
-          if (response.data.message === "Upload successful") {
-            const alternativesData = response.data.alternatives_df;
-            const processedAlternatives = alternativesData.map(item => {
-              return {
-                code: item['Drug Code'],
-                name: item['Name of Product'],
-                unitSize: item['Unit Size'],
-                mrp: item['MRP'],
-                therapeuticGroup: item['Therapeutic Group']
-              };
+            const formData = new FormData();
+            
+            if (Platform.OS === 'web') {
+                try {
+                    const response = await fetch(selectedImage);
+                    const blob = await response.blob();
+                    const imageFile = new File([blob], 'image.jpg', { type: blob.type });
+                    formData.append('image', imageFile);
+                } catch (error) {
+                    console.error("Error processing image:", error);
+                    throw new Error("Failed to process image");
+                }
+            } else {
+                const imageUri = Platform.OS === 'ios' ? selectedImage.replace("file://", "") : selectedImage;
+                const fileExtension = selectedImage.split('.').pop();
+                formData.append('image', {
+                    uri: imageUri,
+                    type: `image/${fileExtension}`,
+                    name: `upload.${fileExtension}`
+                });
+            }
+
+            formData.append('latitude', location.latitude.toString());
+            formData.append('longitude', location.longitude.toString());
+
+            const response = await axios({
+                method: 'post',
+                url: 'http://127.0.0.1:8000/api/images/upload/',
+                data: formData,
+                headers: {
+                    'Accept': 'application/json',
+                    'Content-Type': 'multipart/form-data',
+                },
             });
-    
-            setUploadedImageUrl(response.data.image);
-            setWordRead(response.data.word_read);
-            setAlternatives(processedAlternatives);
-            setNearestStore(response.data.nearest_store);
-            setUploadProgress(100);
-            setShowResultModal(true);
-          }
+
+            console.log("Upload Success:", response.data);
+            setUploadSuccess(true);
+            
+            // Add slight delay to ensure Firestore document is created
+            setTimeout(async () => {
+                await fetchPredictions();
+            }, 2000);
+            
+            Alert.alert("Success", "Image uploaded successfully!");
         } catch (error) {
-          console.error('Upload error:', error);
-          setErrorMessage(error.response?.data?.error || "Failed to upload image. Please try again.");
+            console.error("Upload Error:", error);
+            Alert.alert("Error", "Failed to upload image. Please try again.");
         } finally {
-          setUploading(false);
+            setUploading(false);
         }
-      };
+    };
 
     return (
         <>
@@ -206,29 +226,45 @@ export default function Medisight() {
                         <Text style={styles.placeholder}>No image selected</Text>
                     )}
 
-                <TouchableOpacity 
-                    style={[
-                        styles.uploadButton,
-                        (!selectedImage || !location) && styles.disabledButton
-                    ]}
-                    onPress={handleUpload}
-                    disabled={!selectedImage || !location}
-                >
-                    <Text style={styles.buttonText}>
-                        🚀 {uploading ? 'Uploading...' : 'Upload Image'}
-                    </Text>
-                </TouchableOpacity>
-                <AnimatePresence>
-        <ResultModal
-          isOpen={showResultModal}
-          onClose={() => setShowResultModal(false)}
-          imageUrl={uploadedImageUrl}
-          wordRead={wordRead}
-          alternatives={alternatives}
-          nearestStore={nearestStore}
-        />
-      </AnimatePresence>
-            </View>
+                    <TouchableOpacity style={styles.button} onPress={pickImage}>
+                        <Text style={styles.buttonText}>📂 Pick from Gallery</Text>
+                    </TouchableOpacity>
+
+                    <TouchableOpacity style={styles.button} onPress={takePhoto}>
+                        <Text style={styles.buttonText}>📷 Take a Photo</Text>
+                    </TouchableOpacity>
+
+                    <TouchableOpacity style={styles.locationButton} onPress={getLocation}>
+                        <Text style={styles.buttonText}>📍 Get Location</Text>
+                    </TouchableOpacity>
+
+                    {location && (
+                        <Card style={styles.locationCard}>
+                            <Card.Content>
+                                <Text style={styles.locationText}>
+                                    🌍 Location: {"\n"}
+                                    Latitude: {location.latitude.toFixed(6)}{"\n"}
+                                    Longitude: {location.longitude.toFixed(6)}
+                                </Text>
+                            </Card.Content>
+                        </Card>
+                    )}
+
+                    {uploading && <ActivityIndicator size="large" color="#6200ea" />}
+
+                    <TouchableOpacity 
+                        style={[
+                            styles.uploadButton,
+                            (!selectedImage || !location) && styles.disabledButton
+                        ]}
+                        onPress={uploadImage}
+                        disabled={!selectedImage || !location}
+                    >
+                        <Text style={styles.buttonText}>
+                            🚀 {uploading ? 'Uploading...' : 'Upload Image'}
+                        </Text>
+                    </TouchableOpacity>
+                </View>
             </ScrollView>
             
             <Modal
