@@ -1,4 +1,4 @@
-import { View, Text, StyleSheet, TouchableOpacity, ToastAndroid } from 'react-native';
+import { View, Text, StyleSheet, TouchableOpacity, ToastAndroid, Alert } from 'react-native';
 import React, { useState } from 'react';
 import { TextInput } from 'react-native';
 import { useRouter } from 'expo-router';
@@ -18,14 +18,15 @@ export default function SignUp() {
 
     const OnCreateAccount = () => {
         if (!id || !password || !selectedOption) {
-            ToastAndroid.show('Please fill all the details', ToastAndroid.BOTTOM);
+            // ToastAndroid.show('Please fill all the details', ToastAndroid.BOTTOM);
             Alert.alert('Please enter email and password')
             return;
         }
 
         
         if (!id.includes('@') || !id.includes('.')) {
-            ToastAndroid.show('Please enter a valid email address', ToastAndroid.BOTTOM);
+            // ToastAndroid.show('Please enter a valid email address', ToastAndroid.BOTTOM);
+            Alert.alert('Please enter a valid email')
             return;
         }
 
@@ -46,16 +47,18 @@ export default function SignUp() {
 
             console.log("User created:", user);
             console.log("Role stored in Firestore:", selectedOption);
-
-            ToastAndroid.show('Account created successfully!', ToastAndroid.BOTTOM);
+            Alert.alert('Account created successfully')
+            // ToastAndroid.show('Account created successfully!', ToastAndroid.BOTTOM);
             router.push('login/signin');
         })
         .catch((error) => {
             console.log(error.code, error.message);
             if (error.code === 'auth/email-already-in-use') {
-                ToastAndroid.show('Email already exists', ToastAndroid.BOTTOM);
+                Alert.alert('Email exists')
+                // ToastAndroid.show('Email already exists', ToastAndroid.BOTTOM);
             } else {
-                ToastAndroid.show(error.message, ToastAndroid.BOTTOM);
+                Alert.alert('Error')
+                // ToastAndroid.show(error.message, ToastAndroid.BOTTOM);
             }
         });
 

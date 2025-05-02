@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { View, Text, StyleSheet, Image, TouchableOpacity, Alert, ActivityIndicator, Platform, ScrollView, Modal } from "react-native";
+import { View, Text, StyleSheet, Image, TouchableOpacity, Alert, ActivityIndicator, Platform, ScrollView, Modal, Linking } from "react-native";
 import { Appbar, Card } from "react-native-paper";
 import * as ImagePicker from "expo-image-picker";
 import * as Location from "expo-location";
@@ -272,60 +272,64 @@ export default function Medisight() {
     transparent={true}
     visible={modalVisible}
     onRequestClose={() => setModalVisible(false)}
->
-    <View style={styles.modalContainer}>
-        <View style={styles.modalContent}>
-            <Text style={styles.modalTitle}>All Available Medicines</Text>
-            {predictions.length > 0 ? (
-                <ScrollView style={styles.scrollView}>
-                    {predictions.map((item, index) => (
-                        <Card 
-                            key={item.id} 
-                            style={styles.predictionCard}
-                        >
-                            <Card.Content>
-                                <Text style={styles.cardTitle}>
-                                    Medicine {index + 1}
-                                </Text>
-                                
-                                {/* Display all available fields */}
-                                {item.Name_of_Product && (
-                                    <Text style={styles.itemText}>Name: {item.Name_of_Product}</Text>
-                                )}
-                                {item.MRP && (
-                                    <Text style={styles.itemText}>MRP: ₹{item.MRP}</Text>
-                                )}
-                                {item.Drug_Code && (
-                                    <Text style={styles.itemText}>Drug Code: {item.Drug_Code}</Text>
-                                )}
-                                {item.Unit_Size && (
-                                    <Text style={styles.itemText}>Unit Size: {item.Unit_Size}</Text>
-                                )}
-                                {item.Therapeutic_Group && (
-                                    <Text style={styles.itemText}>Group: {item.Therapeutic_Group}</Text>
-                                )}
-                                {item.Salt_Composition && (
-                                    <Text style={styles.itemText}>Salt: {item.Salt_Composition}</Text>
-                                )}
-                                {item.Manufacturer && (
-                                    <Text style={styles.itemText}>Manufacturer: {item.Manufacturer}</Text>
-                                )}
-                            </Card.Content>
-                        </Card>
-                    ))}
-                </ScrollView>
-            ) : (
-                <Text style={styles.noPredictionsText}>No data available</Text>
-            )}
-            <TouchableOpacity 
-                style={styles.closeButton}
-                onPress={() => setModalVisible(false)}
-            >
-                <Text style={styles.closeButtonText}>Close</Text>
-            </TouchableOpacity>
-        </View>
-    </View>
-</Modal>
+    >
+            <View style={styles.modalContainer}>
+                <View style={styles.modalContent}>
+                    <Text style={styles.modalTitle}>All Available Medicines</Text>
+                    {predictions.length > 0 ? (
+                        <ScrollView style={styles.scrollView}>
+                            {predictions.map((item, index) => (
+                                <Card 
+                                    key={item.id} 
+                                    style={styles.predictionCard}
+                                >
+                                    <Card.Content>
+                                        <Text style={styles.cardTitle}>
+                                            Medicine {index + 1}
+                                        </Text>
+                                        
+                                        
+                                        {item.Name_of_Product && (
+                                            <Text style={styles.itemText}>Name: {item.Name_of_Product}</Text>
+                                        )}
+                                        {item.MRP && (
+                                            <Text style={styles.itemText}>MRP: ₹{item.MRP}</Text>
+                                        )}
+                                        {item.Drug_Code && (
+                                            <Text style={styles.itemText}>Drug Code: {item.Drug_Code}</Text>
+                                        )}
+                                        {item.Unit_Size && (
+                                            <Text style={styles.itemText}>Unit Size: {item.Unit_Size}</Text>
+                                        )}
+                                        {item.Therapeutic_Group && (
+                                            <Text style={styles.itemText}>Group: {item.Therapeutic_Group}</Text>
+                                        )}
+                                        {item.Salt_Composition && (
+                                            <Text style={styles.itemText}>Salt: {item.Salt_Composition}</Text>
+                                        )}
+                                        {item.Manufacturer && (
+                                            <Text style={styles.itemText}>Manufacturer: {item.Manufacturer}</Text>
+                                        )}
+                                    </Card.Content>
+                                </Card>
+                            ))}
+                        </ScrollView>
+                    ) : (
+                        <Text style={styles.noPredictionsText}>No data available</Text>
+                    )}
+                    <TouchableOpacity 
+                        style={styles.closeButton}
+                        onPress={() => setModalVisible(false)}
+                    >
+                        <Text style={styles.closeButtonText}>Close</Text>
+                    </TouchableOpacity>
+                    <Text style={{color: 'blue'}}
+      onPress={() => Linking.openURL('https://www.google.com/maps/dir/?api=1&origin=30.3553352,76.3696162&destination=30.3594702,76.3661877')}>
+                    Go to nearest store
+                    </Text>
+                </View>
+            </View>
+        </Modal>
         </>
     );
 }

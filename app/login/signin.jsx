@@ -16,7 +16,7 @@ import {
   import { useRouter } from 'expo-router';
   import { getAuth, signInWithEmailAndPassword } from 'firebase/auth';
   import { doc, getDoc } from "firebase/firestore";
-  import { db } from '../../config/FirebaseConfig';
+  import { auth, db } from '../../config/FirebaseConfig';
   
   export default function SignIn() {
     const router = useRouter();
@@ -28,7 +28,6 @@ import {
   
     const OnSignInClick = async () => {
       if (!email || !password) {
-        ToastAndroid.show('Please fill all the details', ToastAndroid.BOTTOM);
         Alert.alert('Error', 'Please enter email and password');
         return;
       }
@@ -37,12 +36,16 @@ import {
       try {
         const userCredential = await signInWithEmailAndPassword(auth, email, password);
         const user = userCredential.user;
-        
+  
+        console.log("✅ User logged in:", user.uid);
+  
         const userRef = doc(db, "users", user.uid);
         const userSnap = await getDoc(userRef);
-  
+
         if (userSnap.exists()) {
           const role = userSnap.data().role;
+          console.log("User role:", role);
+  
           switch (role) {
             case "client":
               router.push('(tabs)');
@@ -57,11 +60,15 @@ import {
               Alert.alert('Error', 'Invalid Role');
           }
         } else {
+          console.log("⚠️ User document not found, redirecting...");
           router.push('(tabs)');
         }
       } catch (error) {
+        console.error("❌ Login Error:", error);
         if (error.code === 'auth/invalid-credential') {
           Alert.alert('Error', 'Invalid Email or Password');
+        } else {
+          Alert.alert('Error', error.message);
         }
       } finally {
         setLoading(false);
